@@ -1,0 +1,4 @@
+* text=auto
+*.bat eol=crlf
+Vim/Plugins/* -text
+
