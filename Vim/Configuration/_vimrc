@@ -1,0 +1,422 @@
+"-------------------------------------------------------------------------------
+" Built-In Options
+"-------------------------------------------------------------------------------
+"///////////////////////////////////////////////////////////////////////////////
+" Some Basic Settings
+"///////////////////////////////////////////////////////////////////////////////
+set nocompatible	"don't use gimpy vi behavior
+cd ~              "always start in home (even if run as admin)
+set number	"show line numbers
+set ruler	"always show cursor position
+set laststatus=2	"always show status bar
+set hidden	"hide multiple open files behind the :ls command
+set wildmode=list:longest	"show list and complete with longest one
+set incsearch                     " Highlight matches as you type.
+set hlsearch                      " Highlight matches.
+set backspace=indent,eol,start	"make backspace act normal
+set columns=999 lines=999         "maximum size by default
+set linebreak       "prevent words from wrapping in the middle
+set maxmempattern=2000000
+" Backing up settings that might be different when upgrading Vim by default
+set selectmode=
+set mousemodel=popup 
+set keymodel=
+set selection=inclusive
+
+"///////////////////////////////////////////////////////////////////////////////
+" Tab Settings
+"///////////////////////////////////////////////////////////////////////////////
+set tabstop=2		"use 2 spaces for tabs
+set softtabstop=2	"use 2 spaces for tabs
+set shiftwidth=2	"do the same for auto-indented sourcecode
+set expandtab
+
+"///////////////////////////////////////////////////////////////////////////////
+" Some Syntax Settings
+"///////////////////////////////////////////////////////////////////////////////
+syntax enable		"enable syntax highlighting
+filetype plugin indent on         " Turn on file type detection.
+set foldmethod=syntax
+
+"///////////////////////////////////////////////////////////////////////////////
+" Color/Font Settings
+"///////////////////////////////////////////////////////////////////////////////
+"TODO: find a good complement to the visualstudio one for the non-gui case
+"(inc. the font which is Consolas - which would have to be installed on Mac or
+"Linux but is present on Windows 7)
+colorscheme	zellner	"better than default but overriden by visualstudio in gvimrc
+
+"///////////////////////////////////////////////////////////////////////////////
+" Global state for functions
+"///////////////////////////////////////////////////////////////////////////////
+"TODO: maybe should create this in here instead of in setup script
+let g:ScratchPath = '~/scratch' "created by setup script
+if !exists('g:NextScratchNum')
+  let g:NextScratchNum = 0
+endif
+
+"TODO: figure out if should be using g or s for this variable
+let g:DPWorkingDirectoryStack = []
+
+"-------------------------------------------------------------------------------
+" Plug-Ins
+"-------------------------------------------------------------------------------
+"///////////////////////////////////////////////////////////////////////////////
+"Pathogen plug-in manager (depends on pathogen.vim being in vimfiles\autoload
+"and initially empty bundle folder being in vimfiles)
+execute pathogen#infect()
+
+" Load helptags (via Pathogen)
+Helptags
+
+"///////////////////////////////////////////////////////////////////////////////
+" NERDCommentor Settings
+"///////////////////////////////////////////////////////////////////////////////
+let NERDMenuMode=2
+
+"///////////////////////////////////////////////////////////////////////////////
+" NERDTree settings
+"///////////////////////////////////////////////////////////////////////////////
+let NERDTreeShowBookmarks=1
+let NERDTreeQuitOnOpen=1
+"close Vim if only NERDTree is left
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && 
+                       \ b:NERDTreeType == "primary") | q | endif
+"open Vim with NERDTree if no file specified
+"autocmd StdinReadPre * let s:std_in=1
+"autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+
+"///////////////////////////////////////////////////////////////////////////////
+" BufExplorer settings
+"///////////////////////////////////////////////////////////////////////////////
+"Show buffers without name
+let g:bufExplorerShowNoName=1
+
+"///////////////////////////////////////////////////////////////////////////////
+" Ctrl-P Settings
+"///////////////////////////////////////////////////////////////////////////////
+" Enable extensions
+let g:ctrlp_extensions = ['quickfix', 'dir']
+let g:ctrlp_show_hidden = 0
+let g:ctrlp_max_files = 0
+
+"///////////////////////////////////////////////////////////////////////////////
+" Some options that vimLatex required
+"///////////////////////////////////////////////////////////////////////////////
+" IMPORTANT: win32 users will need to have 'shellslash' set so that latex
+" can be called correctly.
+set shellslash
+
+" IMPORTANT: grep will sometimes skip displaying the file name if you
+" search in a singe file. This will confuse Latex-Suite. Set your grep
+" program to always generate a file-name.
+set grepprg=grep\ -nH\ $*
+
+" OPTIONAL: Starting with Vim 7, the filetype of empty .tex files defaults to
+" 'plaintex' instead of 'tex', which results in vim-latex not being loaded.
+" The following changes the default filetype back to 'tex':
+let g:tex_flavor='latex'
+
+"///////////////////////////////////////////////////////////////////////////////
+" Disable markdown folding
+"///////////////////////////////////////////////////////////////////////////////
+let g:vim_markdown_folding_disabled=1
+
+"-------------------------------------------------------------------------------
+" Functions
+"-------------------------------------------------------------------------------
+"Internal utility to generate list with 'count' items with value 'value'
+function! s:GenerateList(count, value)
+  let i = a:count
+  let output = []
+  while i > 0
+    call add(output, a:value)
+    let i = i - 1
+  endwhile
+
+  return output
+endfunction
+
+"Add up the numbers in all lines of current buffer
+function! Sum()
+	let currentLine = 1
+	let sum = 0.0
+	while currentLine <= line('$')
+    let text = substitute(getline(currentLine), '\$', "", "g")
+		let sum = sum + str2float(text)
+		let currentLine = currentLine + 1
+	endwhile
+	
+	return sum
+endfunction
+
+"Create blank line(s) after given line number (with optional count)
+"TODO: utilize this for future more complex commands if needed
+function! BN(line, ...)
+  let lines = s:GenerateList(get(a:000, 0, 1), "")
+  call append(a:line, lines)
+endfunction
+
+"Create blank lines above current line (with optional count)
+function! BA(...)
+  call BN(line('.') - 1, get(a:000, 0, 1)) 
+endfunction
+
+"Create blank lines below current line (with optional count)
+function! BB(...)
+    call BN(line('.'), get(a:000, 0, 1)) 
+endfunction
+
+"Decorate the current line with a line above and below
+"Decorate(delim, [prefix], [delimCount])
+function! Decorate(delim, ...)
+  let prefix = get(a:000, 0, "")
+  let delimCount = get(a:000, 1, 80 / len(a:delim))
+  if a:0 < 2
+    let delimCount = delimCount - len(prefix) / len(a:delim)
+  endif
+
+  let newline = prefix.repeat(a:delim, delimCount)
+  call append(line('.') - 1, newline)
+  call append(line('.'), newline)  
+endfunction
+
+"Replace all instances of delim with newline in current buffer
+function! Break(delim)
+  execute '%s/'.a:delim.'/\r/g'
+endfunction
+
+"Diff the current buffer against another buffer in a vertical split
+"Diff([bufnum], [loadOnRight])
+""if 1st param is ommited or 0, a new unnamed buffer is used (so that you can
+""paste something in)
+""if 2nd param is provided and boolean true, bufnum will be loaded to the
+""right instead of left
+function! Diff(...)
+  let bufnum = get(a:000, 0, 0)
+  let loadOnRight = get(a:000, 1, 0)
+
+  diffoff!
+  diffthis
+  if bufnum
+    vsplit
+    execute 'b'.bufnum
+  else
+    vnew
+  endif
+
+  if loadOnRight
+    execute "normal! \<C-w>L"
+  endif
+  diffthis
+endfunction
+
+"Convert the current window (including colors) to html next to the original
+"file
+function! Html()
+  TOhtml
+  write! 
+  bd!
+  "needed because appears to be done when really still processing html
+  echo "Done!"      
+endfunction
+
+"Allow for saving/restoring cwd as stack
+function! Pushd()
+  call add(g:DPWorkingDirectoryStack, getcwd()) 
+endfunction
+function! Popd()
+  if len(g:DPWorkingDirectoryStack) > 0
+    execute 'cd '.g:DPWorkingDirectoryStack[-1]
+    let g:DPWorkingDirectoryStack = g:DPWorkingDirectoryStack[:-2]
+    echo getcwd()
+  else
+    echo "No working directories stored!"
+  endif
+endfunction
+
+"Copy the folder of the current item from NERDTree
+"TODO: use a less hacky way to make sure it only happens in NERDTree
+"TODO: handle filenames too (currently will get parent folder for them)
+"TODO: echo less junk
+function! CopyFolderFromNERDTree()
+  if match(bufname('%'), 'NERD_tree_') != 0
+    return
+  endif
+
+  call Pushd()
+  normal cd
+  let @"=getcwd()
+  call Popd()
+  echo @"
+endfunction
+
+"Toggle between text and help file types (ignoring non-text files)
+function! ToggleHelp()
+  let textType = ''
+  let helpType = 'help'
+
+  if &ft == textType
+    let &ft = helpType
+  elseif &ft == helpType
+    let &ft = textType
+  endif
+endfunction
+
+"Create a new buffer for a text file in the scratch folder
+"CreateScratchBuffer([nameWithoutExtension])
+""if name is ommited, a default with auto-incrementing index is used
+function! CreateScratchBuffer(...)
+  if a:0 < 1
+    let newbuffername = 'ScratchBuffer-'.g:NextScratchNum
+    let g:NextScratchNum += 1
+  else
+    let newbuffername = a:1
+  endif
+  
+  execute 'edit '.g:ScratchPath.'/'.newbuffername.'.txt'
+endfunction
+
+"-------------------------------------------------------------------------------
+" Commands
+"-------------------------------------------------------------------------------
+"Wrap the Sum() function
+"TODO: support ranges
+command! Sum echo Sum()
+
+"Automatically change directory to directory of current file
+command! CD cd %:p:h
+
+"Create blank lines above current line
+command! -nargs=? BA call BA(<f-args>)
+"Create blank lines below current line
+command! -nargs=? BB call BB(<f-args>)
+
+"Wrap the Decorate() function
+command! -nargs=+ Decorate call Decorate(<f-args>)
+
+"Replace all instances of delim with newline
+"TODO: support ranges and possibly retabbing
+command! -nargs=1 Break call Break(<f-args>)
+
+"Wrap the Diff() function
+command! -nargs=*  Diff call Diff(<f-args>)
+
+"Wrap the Html() function
+command! -nargs=0 Html call Html()
+
+"Wrap the Pushd() and Popd() functions
+command! -nargs=0 Pushd call Pushd()
+command! -nargs=0 Popd call Popd()
+
+"Wrap the CopyFolderFromNERDTree function
+command! -nargs=0 TreePath call CopyFolderFromNERDTree()
+
+"Wrap the CreateScratchBuffer() function
+command! -nargs=? Scratch call CreateScratchBuffer(<f-args>)
+
+"-------------------------------------------------------------------------------
+" Abbreviations
+"-------------------------------------------------------------------------------
+""Not sure I even want to use this feature due to all the problems
+"iab teh the
+"iab @@	davidpet@ucla.edu
+"iab dap David Petrofsky
+
+"cab py2 !py -2
+"cab py3 !py -3
+"cab py !py
+"cab pl !perl
+
+"-------------------------------------------------------------------------------
+" Key Mappings
+"-------------------------------------------------------------------------------
+"///////////////////////////////////////////////////////////////////////////////
+" Basic editing
+"///////////////////////////////////////////////////////////////////////////////
+"select all (like ctrl-a)
+nnoremap <leader>a ggvG$
+"Quote the word under the cursor
+nnoremap <leader>" viw<esc>a"<esc>hbi"<esc>lel
+nnoremap <leader>' viw<esc>a'<esc>hbi'<esc>lel
+vnoremap <leader>" <esc>`<i"<esc>`>la"<esc>
+vnoremap <leader>' <esc>`<i'<esc>`>la'<esc>
+"clear search highlights (w for white)
+nnoremap <silent> <leader>w :noh<CR>
+"split line in-place and retab the 2nd line
+nnoremap <leader>s i<CR><esc>==
+"move line up or down in buffer
+nnoremap <F2> ddkP
+nnoremap <F3> ddp
+
+"///////////////////////////////////////////////////////////////////////////////
+" OS Interaction
+"///////////////////////////////////////////////////////////////////////////////
+"%% expands in-place to directory of current buffer while typing a command
+cnoremap %% <C-r>=expand('%:h')<CR>
+
+"///////////////////////////////////////////////////////////////////////////////
+" Help
+"///////////////////////////////////////////////////////////////////////////////
+"<leader>? = wrap ToggleHelp() function
+nnoremap <silent> <leader>? :call ToggleHelp()<CR>
+
+"///////////////////////////////////////////////////////////////////////////////
+" NERDTree
+"///////////////////////////////////////////////////////////////////////////////
+nnoremap <C-n> :NERDTreeToggle<CR>
+nnoremap <leader>n :NERDTreeToggle 
+nnoremap <C-S-n> :NERDTreeFind<CR>
+
+"///////////////////////////////////////////////////////////////////////////////
+" File Loading
+"///////////////////////////////////////////////////////////////////////////////
+"load the host file (even though using :e, will be RO unless run as admin)
+nnoremap <leader>h :e $windir/System32/drivers/etc/hosts<CR>		
+"reload vimrc and gvimrc
+nnoremap <leader>rc :source $MYVIMRC<CR>:source $MYGVIMRC<CR>
+"edit vimrc
+nnoremap <leader>ec :e $MYVIMRC<CR>
+"view vimrc as read-only
+nnoremap <leader>vc :view $MYVIMRC<CR>
+
+"///////////////////////////////////////////////////////////////////////////////
+" Clipboard
+"///////////////////////////////////////////////////////////////////////////////
+"F12 = transfer system clipboard to default register
+nnoremap <silent> <F12> :let @"=@+<CR>
+"Shift-F12 = transfer default register to system clipboard
+nnoremap <silent> <S-F12> :let @+=@"<CR>
+"F12 in Visual Mode = paste directly from system clipboard without
+"transferring
+vnoremap <silent> <F12> "+p
+"Shift-F12 in Visual Mode = copy directly to system clipboard
+vnoremap <silent> <S-F12> "+y
+"Ctrl-F12 in Visual Mode = cut directly to system clipboard
+vnoremap <silent> <C-F12> "+d
+
+"///////////////////////////////////////////////////////////////////////////////
+" BufExplorer - 
+"///////////////////////////////////////////////////////////////////////////////
+" next/previous/explore/explore in vsplit/explore in hsplit =
+" F4/Shift-F4/Ctrl-F4/Ctrl-Alt-F4/Alt-F4
+nnoremap <silent> <F4> :bn<CR>
+nnoremap <silent> <S-F4> :bp<CR>
+nnoremap <silent> <C-F4> :BufExplorer<CR>
+noremap <silent> <C-M-F4> :BufExplorerVerticalSplit<CR>
+noremap <silent> <M-F4> :BufExplorerHorizontalSplit<CR>
+" F5 = rerefresh minibufexplorer and the current buffer's contents
+nnoremap <silent> <F5> :bn<CR>:bp<CR>:if &ro<cr>:view<cr>:else<CR>:e<CR>:endif<CR>
+
+"///////////////////////////////////////////////////////////////////////////////
+" Ctrl-P
+"///////////////////////////////////////////////////////////////////////////////
+" convenience alternatives for the longer commands
+" <leader>p = ctrl-p with path (doesn't work if you put <silent>)
+nnoremap <leader>p :CtrlP 
+" Alt-P = ctrl-p on MRU list
+nnoremap <silent> <M-p> :CtrlPMRU<CR>
+" Ctrl-Shift-P = ctrl-p on directories
+nnoremap <silent> <C-S-p> :CtrlPDir<CR>
+" Shift-Alt-P = quickfix search
+nnoremap <silent> <M-S-p> :CtrlPQuickfix<CR>
