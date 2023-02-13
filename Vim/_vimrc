@@ -1,0 +1,78 @@
+"-------------------------------------------------------------------------------
+" Built-In Options
+"-------------------------------------------------------------------------------
+"///////////////////////////////////////////////////////////////////////////////
+" Some Basic Settings
+"///////////////////////////////////////////////////////////////////////////////
+set nocompatible	"don't use gimpy vi behavior
+set number	"show line numbers
+set ruler	"always show cursor position
+set laststatus=2	"always show status bar
+set hidden	"hide multiple open files behind the :ls command
+set wildmode=list:longest	"show list and complete with longest one
+set incsearch                     " Highlight matches as you type.
+set hlsearch                      " Highlight matches.
+set backspace=indent,eol,start	"make backspace act normal
+set linebreak       "prevent words from wrapping in the middle
+set maxmempattern=2000000
+" Backing up settings that might be different when upgrading Vim by default
+set selectmode=
+set mousemodel=popup 
+set keymodel=
+set selection=inclusive
+set nobackup     "don't want extra files left around after done editing
+set noundofile   "don't want extra files left around after done editing
+
+"///////////////////////////////////////////////////////////////////////////////
+" Tab Settings
+"///////////////////////////////////////////////////////////////////////////////
+set tabstop=2		"use 2 spaces for tabs
+set softtabstop=2	"use 2 spaces for tabs
+set shiftwidth=2	"do the same for auto-indented sourcecode
+set expandtab
+
+"///////////////////////////////////////////////////////////////////////////////
+" Some Syntax Settings
+"///////////////////////////////////////////////////////////////////////////////
+syntax enable		"enable syntax highlighting
+filetype plugin indent on         " Turn on file type detection.
+set foldmethod=syntax
+
+"///////////////////////////////////////////////////////////////////////////////
+" Color/Font Settings
+"///////////////////////////////////////////////////////////////////////////////
+"TODO: find a good complement to the visualstudio one for the non-gui case
+"(inc. the font which is Consolas - which would have to be installed on Mac or
+"Linux but is present on Windows 7)
+"colorscheme	zellner	"better than default but overriden by visualstudio in gvimrc
+
+"///////////////////////////////////////////////////////////////////////////////
+" Global state for functions
+"///////////////////////////////////////////////////////////////////////////////
+"TODO: maybe should create this in here instead of in setup script
+let g:ScratchPath = '~/scratch' "created by setup script
+if !exists('g:NextScratchNum')
+  let g:NextScratchNum = 0
+endif
+
+"TODO: figure out if should be using g or s for this variable
+let g:DPWorkingDirectoryStack = []
+
+"///////////////////////////////////////////////////////////////////////////////
+"GVim (or terminal only) Settings
+"///////////////////////////////////////////////////////////////////////////////
+if has("gui_running")
+  set columns=999 lines=999    "maximize in Windows only
+else
+  colorscheme	zellner	"better than default but overriden by visualstudio in gvimrc
+endif
+
+"///////////////////////////////////////////////////////////////////////////////
+"OS-Specific Settings
+"///////////////////////////////////////////////////////////////////////////////
+if has("unix")
+  cd ~
+else
+  cd D:\LinuxHome
+endif
+
