@@ -15,3 +15,5 @@ alias ai="conda activate ai"
 # Run Jupyter notebooks in tutorials folder with no browser so I can hit it from Windows.
 alias jupyter-tutorials="jupyter notebook --notebook-dir=~/repos/tutorials/Jupyter --no-browser"
 
+# Run Jupyter notebooks in snippts folder with no browser.
+alias jupyter-snippets="jupyter notebook --notebook-dir=~/repos/snippets --no-browser"
