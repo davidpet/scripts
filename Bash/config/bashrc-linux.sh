@@ -17,3 +17,6 @@ alias jupyter-tutorials="jupyter notebook --notebook-dir=~/repos/tutorials/Jupyt
 
 # Run Jupyter notebooks in snippts folder with no browser.
 alias jupyter-snippets="jupyter notebook --notebook-dir=~/repos/snippets --no-browser"
+
+# Run Jupyter notebooks in Course Labs folder with no browser.
+alias jupyter-coursera="jupyter notebook --notebook-dir=/mnt/p/Training/Coursera\ Courses --no-browser"
