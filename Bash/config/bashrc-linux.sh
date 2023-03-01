@@ -20,3 +20,9 @@ alias jupyter-snippets="jupyter notebook --notebook-dir=~/repos/snippets --no-br
 
 # Run Jupyter notebooks in Course Labs folder with no browser.
 alias jupyter-coursera="jupyter notebook --notebook-dir=/mnt/p/Training/Coursera\ Courses --no-browser"
+
+# Look for occurences of the given regex pattern within jupyter notebooks from coursera labs.
+function grep-coursera() {
+  grep -R --exclude-dir='\.ipynb_checkpoints' --include '*.ipynb' "$1" "/mnt/p/Training/Coursera Courses"
+}
+
