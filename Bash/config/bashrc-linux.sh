@@ -9,6 +9,9 @@ function dos2unix() {
 # Get rid of Jupyter kernel errors in WSL
 export JUPYTER_ALLOW_INSECURE_WRITES=true
 
+# Fix Cuda crash on model.fit() in TF.
+export LD_LIBRARY_PATH=/usr/lib/wsl/lib:$LD_LIBRARY_PATH
+
 # Quickly switch to AI environment.
 alias ai="conda activate ai"
 
