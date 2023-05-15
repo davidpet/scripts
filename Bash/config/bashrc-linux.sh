@@ -12,6 +12,9 @@ export JUPYTER_ALLOW_INSECURE_WRITES=true
 # Fix Cuda crash on model.fit() in TF.
 export LD_LIBRARY_PATH=/usr/lib/wsl/lib:$LD_LIBRARY_PATH
 
+# Make my shared python libraries available to scripts and notebooks.
+export PYTHONPATH=~/repos/ml-models;$PYTHONPATH
+
 # Quickly switch to AI environment.
 alias ai="conda activate ai"
 
@@ -31,4 +34,3 @@ alias jupyter-models="jupyter notebook --notebook-dir=~/repos/ml-models --no-bro
 function grep-coursera() {
   grep -R --exclude-dir='\.ipynb_checkpoints' --include '*.ipynb' "$1" "/mnt/p/Training/Coursera Courses"
 }
-
