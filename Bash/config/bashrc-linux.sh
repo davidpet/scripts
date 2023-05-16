@@ -13,7 +13,7 @@ export JUPYTER_ALLOW_INSECURE_WRITES=true
 export LD_LIBRARY_PATH=/usr/lib/wsl/lib:$LD_LIBRARY_PATH
 
 # Make my shared python libraries available to scripts and notebooks.
-export PYTHONPATH=~/repos/ml-models;$PYTHONPATH
+export PYTHONPATH=~/repos/projects;$PYTHONPATH
 
 # Quickly switch to AI environment.
 alias ai="conda activate ai"
@@ -27,8 +27,8 @@ alias jupyter-snippets="jupyter notebook --notebook-dir=~/repos/snippets --no-br
 # Run Jupyter notebooks in Course Labs folder with no browser.
 alias jupyter-coursera="jupyter notebook --notebook-dir=/mnt/p/Training/Coursera\ Courses --no-browser"
 
-# Run Jupyter notebooks in ml-models folder with no browser.
-alias jupyter-models="jupyter notebook --notebook-dir=~/repos/ml-models --no-browser"
+# Run Jupyter notebooks in projects folder with no browser.
+alias jupyter-projects="jupyter notebook --notebook-dir=~/repos/projects --no-browser"
 
 # Look for occurences of the given regex pattern within jupyter notebooks from coursera labs.
 function grep-coursera() {
