@@ -15,6 +15,9 @@ export LD_LIBRARY_PATH=/usr/lib/wsl/lib:$LD_LIBRARY_PATH
 # Make my shared python libraries available to scripts and notebooks.
 export PYTHONPATH=~/repos/projects;$PYTHONPATH
 
+# Use my copy of the pylintrc file for pylint rc configuration.
+export PYLINTRC=~/repos/projects/.pylintrc
+
 # Quickly switch to AI environment.
 alias ai="conda activate ai"
 
