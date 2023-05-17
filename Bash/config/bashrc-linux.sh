@@ -21,6 +21,9 @@ export PYLINTRC=~/repos/projects/.pylintrc
 # Quickly switch to AI environment.
 alias ai="conda activate ai"
 
+# Format all .py files recursively in a given folder.
+alias format-python="yapf --style google --recursive --in-place"
+
 # Run Jupyter notebooks in tutorials folder with no browser so I can hit it from Windows.
 alias jupyter-tutorials="jupyter notebook --notebook-dir=~/repos/tutorials/Jupyter --no-browser"
 
