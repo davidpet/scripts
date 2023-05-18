@@ -24,6 +24,9 @@ alias ai="conda activate ai"
 # Format all .py files recursively in a given folder.
 alias format-python="yapf --style google --recursive --in-place"
 
+# Lint all .py files recursively in a given folder.
+alias lint-python="pylint --rcfile $PYLINTRC"  # Needed for now until find out why Mac ignores variable.
+
 # Run Jupyter notebooks in tutorials folder with no browser so I can hit it from Windows.
 alias jupyter-tutorials="jupyter notebook --notebook-dir=~/repos/tutorials/Jupyter --no-browser"
 
