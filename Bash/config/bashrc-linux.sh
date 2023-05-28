@@ -18,6 +18,9 @@ export PYTHONPATH=~/repos/projects;$PYTHONPATH
 # Use my copy of the pylintrc file for pylint rc configuration.
 export PYLINTRC=~/repos/projects/.pylintrc
 
+# Allow 'ng test' to find Windows Chrome in WSL.
+export CHROME_BIN=/mnt/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome.exe
+	
 # Quickly switch to AI environment.
 alias ai="conda activate ai"
 
