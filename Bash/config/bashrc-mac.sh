@@ -7,7 +7,7 @@ export GREP_OPTIONS='--color=auto'
 export GREP_COLORS='34;35;40' # TODO: get this to work
 
 # Make my shared python libraries available to scripts and notebooks.
-export PYTHONPATH=~/repos/projects;$PYTHONPATH
+export PYTHONPATH=~/repos/projects:$PYTHONPATH
 
 # Use my copy of the pylintrc file for pylint rc configuration.
 export PYLINTRC=~/repos/projects/.pylintrc
