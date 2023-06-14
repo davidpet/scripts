@@ -48,5 +48,5 @@ function grep-coursera() {
 }
 
 # JDK Paths.
-export JAVA_HOME=$HOME/OpenJDK/jdk-20.0.1.jdk/Contents/Home
+export JAVA_HOME=$HOME/OpenJDK/jdk-20.0.1
 export PATH=$JAVA_HOME/bin:$PATH
