@@ -46,3 +46,7 @@ alias jupyter-projects="jupyter notebook --notebook-dir=~/repos/projects --no-br
 function grep-coursera() {
   grep -R --exclude-dir='\.ipynb_checkpoints' --include '*.ipynb' "$1" "/mnt/p/Training/Coursera Courses"
 }
+
+# JDK Paths.
+export JAVA_HOME=$HOME/OpenJDK/jdk-20.0.1.jdk/Contents/Home
+export PATH=$JAVA_HOME/bin:$PATH
