@@ -42,7 +42,5 @@ function grep-coursera() {
 export JAVA_HOME=$HOME/OpenJDK/jdk-20.0.1.jdk/Contents/Home
 export PATH=$JAVA_HOME/bin:$PATH
 
-# Recursive java formatting
-function format-java() {
-  find "$1" -name "*.java" -exec java -jar ~/google-java-format-1.16.0-all-deps.jar --replace {} \;
-}
+# Repo scripts.
+source ~/repos/projects/setup/java-tools.sh
