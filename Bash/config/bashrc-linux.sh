@@ -53,6 +53,8 @@ export PATH=$JAVA_HOME/bin:$PATH
 
 # Repo scripts.
 source ~/repos/projects/setup/java-tools.sh
+alias changed=~/repos/projects/scripts/changed.sh
+alias tests=~/repos/projects/scripts/tests.sh
 
 # Enable communication with x-server on windows host.
 export DISPLAY=$(hostname).local:0
