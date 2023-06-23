@@ -1,3 +1,7 @@
+SCRIPT_FOLDER="$(dirname "${BASH_SOURCE[0]}")"
+
+source "$SCRIPT_FOLDER/bashrc-common.sh"
+
 # davidpet Stuff
 alias reload='source ~/.bashrc'
 
@@ -38,12 +42,6 @@ function grep-coursera() {
 # JDK Paths.
 export JAVA_HOME=$HOME/OpenJDK/jdk-20.0.1
 export PATH=$JAVA_HOME/bin:$PATH
-
-# Repo scripts.
-source ~/repos/projects/setup/java-tools.sh
-source ~/repos/projects/setup/python-tools.sh
-alias changed=~/repos/projects/scripts/changed.sh
-alias tests=~/repos/projects/scripts/tests.sh
 
 # Enable communication with x-server on windows host.
 export DISPLAY=$(hostname).local:0

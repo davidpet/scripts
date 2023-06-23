@@ -1,3 +1,7 @@
+SCRIPT_FOLDER="$(dirname "${BASH_SOURCE[0]}")"
+
+source "$SCRIPT_FOLDER/bashrc-common.sh"
+
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 export PATH=/usr/local/bin:$PATH
@@ -28,9 +32,3 @@ function grep-coursera() {
 # JDK paths.
 export JAVA_HOME=$HOME/OpenJDK/jdk-20.0.1.jdk/Contents/Home
 export PATH=$JAVA_HOME/bin:$PATH
-
-# Repo scripts.
-source ~/repos/projects/setup/java-tools.sh
-source ~/repos/projects/setup/python-tools.sh
-alias changed=~/repos/projects/scripts/changed.sh
-alias tests=~/repos/projects/scripts/tests.sh
