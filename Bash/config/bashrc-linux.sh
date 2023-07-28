@@ -3,6 +3,7 @@ SCRIPT_FOLDER="$(dirname "${BASH_SOURCE[0]}")"
 source "$SCRIPT_FOLDER/bashrc-common.sh"
 
 # davidpet Stuff
+# TODO: figure out how to reload without causing PATH to leak global pip packages.
 alias reload='source ~/.bashrc'
 
 # Does an in-place replacement because piping to the same file doesn't work.

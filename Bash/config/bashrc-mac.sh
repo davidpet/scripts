@@ -10,6 +10,7 @@ export PATH=/usr/local/bin:$PATH
 export GREP_OPTIONS='--color=auto'
 export GREP_COLORS='34;35;40' # TODO: get this to work
 
+# TODO: figure out how to reload without causing PATH to leak global pip packages.
 alias reload='source ~/.bash_profile'
 
 alias jupyter-tutorials="jupyter notebook --notebook-dir=~/repos/tutorials/Jupyter"
