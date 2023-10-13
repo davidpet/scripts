@@ -13,6 +13,8 @@ export GREP_COLORS='34;35;40' # TODO: get this to work
 # TODO: figure out how to reload without causing PATH to leak global pip packages.
 alias reload='source ~/.bash_profile'
 
+alias clang-tidy="/opt/homebrew/opt/llvm/bin/clang-tidy"
+
 alias jupyter-tutorials="jupyter notebook --notebook-dir=~/repos/tutorials/Jupyter"
 
 alias jupyter-snippets="jupyter notebook --notebook-dir=~/repos/snippets"
