@@ -34,7 +34,7 @@ function grep-coursera() {
 
 # Run a single source file with clang++.
 function clang-run() {
-  clang++ "$1" -o output && ./output
+  clang++ -std=c++20 "$1" -o output && ./output
 }
 
 # JDK paths.
