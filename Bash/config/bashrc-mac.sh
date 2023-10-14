@@ -32,6 +32,11 @@ function grep-coursera() {
   grep -R --exclude-dir='\.ipynb_checkpoints' --include '*.ipynb' "$1" ~/desktop/CourseraLabs
 }
 
+# Run a single source file with clang++.
+function clang-run() {
+  clang++ "$1" -o output && ./output
+}
+
 # JDK paths.
 export JAVA_HOME=$HOME/OpenJDK/jdk-20.0.1.jdk/Contents/Home
 export PATH=$JAVA_HOME/bin:$PATH
