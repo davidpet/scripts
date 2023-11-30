@@ -38,5 +38,5 @@ function clang-run() {
 }
 
 # JDK paths.
-export JAVA_HOME=$HOME/OpenJDK/jdk-20.0.1.jdk/Contents/Home
+export JAVA_HOME=$HOME/OpenJDK/jdk-21.0.1.jdk/Contents/Home
 export PATH=$JAVA_HOME/bin:$PATH

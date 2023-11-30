@@ -41,7 +41,7 @@ function grep-coursera() {
 }
 
 # JDK Paths.
-export JAVA_HOME=$HOME/OpenJDK/jdk-20.0.1
+export JAVA_HOME=$HOME/OpenJDK/jdk-21.0.1
 export PATH=$JAVA_HOME/bin:$PATH
 
 # Enable communication with x-server on windows host.
