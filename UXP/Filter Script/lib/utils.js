@@ -162,7 +162,7 @@ async function getLayerKindIndex(layerId) {
           _options: { dialogOptions: "dontDisplay" },
         },
       ],
-      { synchronousExecution: true, modalBehavior: "fail" }
+      { synchronousExecution: false, modalBehavior: "fail" }
     );
 
     const first = Array.isArray(result) ? result[0] : null;
