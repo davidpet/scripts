@@ -11,8 +11,10 @@ Click the ••• button next to the corresponding workspace entry, and click 
 
 ## Status
 
-It currently just shows all the layer names of the current document when you click the button (as per the template).
+It will currently show the layer name and type, plus the document dimensions, color mode, and bit depth.
 
 ## TBD
 
+1. Why does button not disable during processing?
 1. Fix icons issue in manifest.json.
+1. Do not export helpers that are not used outside the files themselves.
