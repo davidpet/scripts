@@ -1,23 +1,16 @@
 const { entrypoints } = require("uxp");
+const { app } = require("photoshop");
 
-  showAlert = () => {
-    alert("This is an alert message");
-  }
-
-  entrypoints.setup({
-    commands: {
-      showAlert,
-    },
-    panels: {
-      vanilla: {
-        show(node ) {
-        }
+entrypoints.setup({
+  panels: {
+    vanilla: {
+      show(node ) {
       }
     }
-  });
+  }
+});
 
 function showLayerNames() {
-    const app = require("photoshop").app;
     const allLayers = app.activeDocument.layers;
     const allLayerNames = allLayers.map(layer => layer.name);
     const sortedNames = allLayerNames.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);

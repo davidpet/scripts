@@ -10,11 +10,6 @@
   "manifestVersion": 5,
   "entrypoints": [
     {
-      "type": "command",
-      "id": "showAlert",
-      "label": "Show alert"
-    },
-    {
       "type": "panel",
       "id": "vanilla",
       "minimumSize": {
@@ -37,7 +32,7 @@
         {
           "width": 32,
           "height": 32,
-          "path": "icons/icon_D.png",
+          "path": "icons/dark.png",
           "scale": [
             1,
             2
@@ -53,7 +48,7 @@
         {
           "width": 32,
           "height": 32,
-          "path": "icons/icon_N.png",
+          "path": "icons/light.png",
           "scale": [
             1,
             2
