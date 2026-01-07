@@ -1,0 +1,137 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  box-sizing: border-box;
+  padding: 12px;
+  background: var(--uxp-host-background-color, #1e1e1e);
+  color: var(--uxp-host-text-color, #f2f2f2);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.cu-offstage {
+  display: none;
+}
+
+.cu-panel {
+  height: 100vh;
+  min-height: 0;              /* IMPORTANT: allow flex children to shrink */
+  display: flex;
+  flex-direction: column;
+  gap: 14px;           
+}
+
+.cu-row {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 10px;
+  row-gap: 10px;   /* this fixes “crammed” when it wraps */
+  align-items: center;
+}
+
+.cu-status {
+  margin: 10px 0;           
+  padding: 10px 12px;       
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  user-select: text; /* make messages selectable */
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.cu-status--ok {
+  background: rgba(0, 255, 140, 0.12);
+  border-color: rgba(120, 255, 200, 0.25);
+  color: rgba(210, 255, 240, 0.95);
+}
+
+.cu-status--error {
+  background: rgba(255, 90, 90, 0.18);
+  border-color: rgba(255, 140, 140, 0.35);
+  color: rgba(255, 215, 215, 0.98);
+}
+
+.cu-output {
+  flex: 1;
+  width: 100%;
+  min-height: 420px;
+  resize: none;
+
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.92);
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.45;
+
+  user-select: text; /* critical for copy/paste */
+}
+
+/* Add space under title + divider */
+sp-heading {
+  margin: 0 0 6px 0;
+}
+
+sp-divider {
+  margin: 0 0 6px 0;
+}
+
+/* Space above status + below it, and above first button row */
+.cu-row {
+  margin-top: 6px;
+}
+
+.cu-status {
+  margin: 12px 0;             /* more space above/below status line */
+}
+
+/* Make Spectrum buttons feel clickable */
+sp-button {
+  cursor: pointer;
+}
+sp-button[disabled] {
+  cursor: default;
+}
+
+/* Make the output area behave nicely in flex layouts */
+.cu-output {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  overflow-x: auto;
+  overflow-y: scroll;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden; /* prevent the whole panel from scrolling */
+}
+
+.cu-panel {
+  height: 100%;
+  min-height: 0;    /* required for flex children to scroll */
+  display: flex;
+  flex-direction: column;
+}
+
+.cu-output {
+  flex: 1 1 0;
+  min-height: 0;         /* critical */
+  overflow: auto;        /* UXP supports overflow auto/scroll :contentReference[oaicite:3]{index=3} */
+  resize: none;
+}

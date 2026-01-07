@@ -1,0 +1,7 @@
+{
+  "name": "clip-utils",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Clip Utils - Premiere Pro UXP plugin",
+  "main": "index.html"
+}

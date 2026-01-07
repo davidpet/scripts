@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="css/common.css" />
+    <link rel="stylesheet" href="css/effect-dump.css" />
+    <link rel="stylesheet" href="css/anchor-nudge.css" />
+    <script src="js/main.js"></script>
+  </head>
+
+  <body>
+    <!-- Offstage wrappers (Premiere multi-panel: panels share one document) -->
+    <div id="cu-effectdump-panel" class="cu-panel cu-offstage">
+      <sp-heading size="S">Effect Dump</sp-heading>
+      <sp-divider size="M"></sp-divider>
+
+      <div class="cu-row">
+        <sp-button id="cu-dump-run" variant="accent">Dump selected clip</sp-button>
+        <sp-button id="cu-dump-copy-selection" variant="secondary">Copy selection</sp-button>
+        <sp-button id="cu-dump-copy-all" variant="secondary">Copy all</sp-button>
+        <sp-button id="cu-dump-clear" variant="secondary">Clear</sp-button>
+      </div>
+
+      <div id="cu-dump-status" class="cu-status" aria-live="polite"></div>
+
+      <textarea
+        id="cu-dump-output"
+        class="cu-output"
+        readonly
+        spellcheck="false"
+        wrap="off"
+        aria-label="Effect dump output"
+      ></textarea>
+    </div>
+
+    <div id="cu-anchornudge-panel" class="cu-panel cu-offstage">
+      <sp-heading size="S">Anchor Nudge</sp-heading>
+      <sp-divider size="M"></sp-divider>
+      <sp-body>Anchor Nudge UI is unchanged by this patch.</sp-body>
+    </div>
+  </body>
+</html>

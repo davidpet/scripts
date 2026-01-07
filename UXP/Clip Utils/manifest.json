@@ -1,0 +1,38 @@
+{
+  "id": "com.cliputils.plugin",
+  "name": "Clip Utils",
+  "version": "1.0.1",
+  "main": "index.html",
+  "manifestVersion": 5,
+  "host": { "app": "premierepro", "minVersion": "25.6.0" },
+  "requiredPermissions": {
+    "clipboard": "readAndWrite"
+  },
+  "entrypoints": [
+    {
+      "id": "effectDumpPanel",
+      "type": "panel",
+      "label": { "default": "Effect Dump" },
+      "minimumSize": { "width": 2000, "height": 1024 },
+      "preferredDockedSize": { "width": 2000, "height": 1024 },
+      "preferredFloatingSize": { "width": 2000, "height": 1024 }
+    },
+    {
+      "id": "anchorNudgePanel",
+      "type": "panel",
+      "label": { "default": "Anchor Nudge" },
+      "minimumSize": { "width": 420, "height": 420 },
+      "preferredDockedSize": { "width": 520, "height": 520 }
+    },
+    {
+      "id": "extractMotion",
+      "type": "command",
+      "label": { "default": "Extract Motion" }
+    },
+    {
+      "id": "collapseMotion",
+      "type": "command",
+      "label": { "default": "Collapse Motion" }
+    }
+  ]
+}

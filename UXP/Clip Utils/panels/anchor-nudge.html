@@ -1,0 +1,35 @@
+<div class="cu-panel" id="cu-anchornudge">
+  <div class="cu-row">
+    <sp-heading size="S">Anchor Nudge</sp-heading>
+  </div>
+
+  <div class="cu-box">
+    <sp-body size="S" class="cu-muted">
+      Moves the selected effect’s Anchor Point by a delta in sequence/program space, and shifts Position by the inverse delta to keep the image visually stationary.
+      Requires exactly 1 selected clip.
+    </sp-body>
+  </div>
+
+  <div class="cu-row cu-box">
+    <sp-button id="cu-refresh-effects" variant="secondary">Refresh</sp-button>
+
+    <sp-picker id="cu-effect-picker" class="cu-grow" label="Effect">
+      <sp-menu-item value="">(select a clip first)</sp-menu-item>
+    </sp-picker>
+  </div>
+
+  <div class="cu-row cu-box">
+    <sp-number-field id="cu-step" label="Step (px)" value="10" min="0" step="1"></sp-number-field>
+
+    <div class="cu-row">
+      <sp-button id="cu-up" variant="secondary">↑</sp-button>
+      <sp-button id="cu-down" variant="secondary">↓</sp-button>
+      <sp-button id="cu-left" variant="secondary">←</sp-button>
+      <sp-button id="cu-right" variant="secondary">→</sp-button>
+    </div>
+
+    <sp-button id="cu-nudge-apply" variant="primary">Apply</sp-button>
+  </div>
+
+  <div id="cu-nudge-status" class="cu-mono cu-ok" style="display:none"></div>
+</div>

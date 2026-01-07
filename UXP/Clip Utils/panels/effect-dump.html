@@ -1,0 +1,22 @@
+<div class="cu-panel" id="cu-effectdump">
+  <div class="cu-row">
+    <sp-heading size="S">Effect Properties Dump</sp-heading>
+  </div>
+
+  <div class="cu-row">
+    <sp-button id="cu-dump-btn" variant="primary">Dump selected clip</sp-button>
+    <sp-button id="cu-dump-copy" variant="secondary">Copy</sp-button>
+    <sp-button id="cu-dump-clear" variant="secondary">Clear</sp-button>
+  </div>
+
+  <div class="cu-box">
+    <div class="cu-row cu-muted">
+      <sp-body size="S">
+        Requires exactly 1 selected clip. Samples values at current playhead time.
+      </sp-body>
+    </div>
+
+    <div id="cu-dump-status" class="cu-mono cu-ok" style="display:none"></div>
+    <div id="cu-dump-output" class="cu-mono" style="height: 520px;"></div>
+  </div>
+</div>
