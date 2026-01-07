@@ -1,7 +1,7 @@
 {
-  "name": "uxp-template-ps-starter",
+  "name": "ps-filter-script",
   "version": "1.0.0",
-  "description": "Starter template for creating Adobe UXP based-Photoshop plugin.",
-  "author": "Adobe Inc",
+  "description": "Photoshop UXP plugin for running shader-like filters on image pixels.",
+  "author": "David Petrofsky",
   "license": "Apache-2.0"
 }

@@ -1,0 +1,7 @@
+{
+  "name": "ps-layer-info",
+  "version": "1.0.0",
+  "description": "Layer info template (and usable plugin as well) for creating Adobe UXP based-Photoshop plugin.",
+  "author": "David Petrofsky",
+  "license": "Apache-2.0"
+}

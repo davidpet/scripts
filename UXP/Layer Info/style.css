@@ -1,0 +1,15 @@
+body {
+    color: white;
+    padding: 0 16px;
+  }
+
+#data {
+  border: 1px solid #808080;
+  border-radius: 4px;
+  padding: 16px;
+  white-space: pre-wrap;
+}
+
+#action {
+  cursor: pointer;
+}
