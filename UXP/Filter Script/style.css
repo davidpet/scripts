@@ -7,9 +7,13 @@ body {
   border: 1px solid #808080;
   border-radius: 4px;
   padding: 16px;
-  white-space: pre-wrap;
+  white-space: pre-line;
 }
 
 #action {
   cursor: pointer;
+}
+
+#createLayer {
+  margin: 12px 0;
 }

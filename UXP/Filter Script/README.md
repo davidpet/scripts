@@ -11,10 +11,17 @@ Click the ••• button next to the corresponding workspace entry, and click 
 
 ## Status
 
-It will currently show the layer name and type, plus the document dimensions, color mode, and bit depth.
+Currently, it will do the following on `Apply` button:
+1. If no layer is selected, make a new empty layer and select it.
+1. If a layer is selected, and `Create New Layer` is checked, the layer is copied and selected.
+1. If a layer is selected, and `Create New Layer` is unchecked, do nothing and move on.
+1. Show the layer name and type for selected layer (after the above steps), plus document dimensions, color moade, and bith depth.
 
 ## TBD
 
+1. Deal with masks, clipping masks, and selections?
 1. Why does button not disable during processing?
 1. Fix icons issue in manifest.json.
+1. Split `utils.js`.
 1. Do not export helpers that are not used outside the files themselves.
+1. Remove any unused code paths.

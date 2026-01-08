@@ -1,4 +1,4 @@
-const { constants } = require("photoshop");
+const { constants, core, app } = require("photoshop");
 
 function humanizeCamelCase(str) {
   return String(str)
@@ -204,5 +204,171 @@ function withBusyButton(buttonEl, asyncHandler, options) {
   };
 }
 
+function getActiveDocumentOrNull() {
+  try {
+    return app.activeDocument;
+  } catch (e) {
+    return null;
+  }
+}
 
-module.exports = { humanizeCamelCase, enumKeyFromValue, documentModeToLabel, layerKindToLabel, bitsPerChannelToLabel, isAmbiguousSolidFillKind, getLayerKindIndex, getLayerTypeLabel, withBusyButton };
+function getEnumKey(enumObj, value) {
+  if (!enumObj) return null;
+  for (const k of Object.keys(enumObj)) {
+    if (enumObj[k] === value) return k;
+  }
+  return null;
+}
+
+function getColorModeString(mode) {
+  // Handles cases like "RGBCOLORMODE"
+  if (typeof mode === "string") {
+    return mode.toUpperCase().replace(/COLORMODE$/, "").replace(/COLOR$/, "");
+  }
+  const key =
+    getEnumKey(constants.DocumentMode, mode) ||
+    getEnumKey(constants.ChangeMode, mode);
+  return key ? key : String(mode);
+}
+
+function getBitsPerChannelString(bitsPerChannel) {
+  if (typeof bitsPerChannel === "number") return `${bitsPerChannel} bpc`;
+  if (typeof bitsPerChannel === "string") {
+    const s = bitsPerChannel.toUpperCase();
+    
+    // Handle tokens like "BITDEPTH16"
+    const m = s.match(/BITDEPTH(\d+)/);
+    if (m && m[1]) return `${m[1]} bpc`;
+
+
+    if (s.includes("EIGHT") || s === "8") return "8 bpc";
+    if (s.includes("SIXTEEN") || s === "16") return "16 bpc";
+    if (s.includes("THIRTYTWO") || s === "32") return "32 bpc";
+    return s;
+  }
+
+  const key = getEnumKey(constants.BitsPerChannelType, bitsPerChannel);
+  if (key === "EIGHT") return "8 bpc";
+  if (key === "SIXTEEN") return "16 bpc";
+  if (key === "THIRTYTWO") return "32 bpc";
+  return key ? key : String(bitsPerChannel);
+}
+
+function isPixelLayer(layer) {
+  if (!layer) return false;
+  if (layer.isBackgroundLayer) return true;
+  return layer.kind === constants.LayerKind.NORMAL;
+}
+
+function getPixelLayerTypeString(layer) {
+  if (layer && layer.isBackgroundLayer) return "Background Layer";
+  return "Pixel Layer";
+}
+
+async function resolveTargetLayer(doc, createNewLayer, newLayerName) {
+  const activeLayers = Array.from(doc.activeLayers || []);
+
+  // Multiple selection is not supported in this simplified design
+  if (activeLayers.length > 1) {
+    throw new Error("Multiple layers selected. Please select exactly one layer.");
+  }
+
+  const selectedLayer = activeLayers.length === 1 ? activeLayers[0] : null;
+
+  if (createNewLayer) {
+    if (!selectedLayer) {
+      // Create empty layer if nothing selected
+      const newLayer = await doc.createLayer({ name: newLayerName });
+      doc.activeLayers = [newLayer];
+      return { targetLayer: newLayer, createdNewLayer: true };
+    }
+
+    // Selected layer must be pixel
+    if (!isPixelLayer(selectedLayer)) {
+      throw new Error("Selected layer is not a pixel layer.");
+    }
+
+    // Copy pixels by duplicating (does not modify original)
+    const dup = await selectedLayer.duplicate();
+    dup.name = newLayerName;
+    doc.activeLayers = [dup];
+    return { targetLayer: dup, createdNewLayer: true };
+  }
+
+  // createNewLayer == false (in-place target)
+  if (!selectedLayer) {
+    throw new Error('No layer selected. Enable "Create New Layer" or select a pixel layer.');
+  }
+  if (!isPixelLayer(selectedLayer)) {
+    throw new Error("Selected layer is not a pixel layer.");
+  }
+
+  return { targetLayer: selectedLayer, createdNewLayer: false };
+}
+
+async function applyFilter({ createNewLayer, newLayerName = "Filter Script Layer" } = {}) {
+  // Quick pre-check for nicer error message
+  const doc = getActiveDocumentOrNull();
+  if (!doc) throw new Error("No document open.");
+
+  let result;
+
+  await core.executeAsModal(
+    async (executionContext, descriptor) => {
+      const innerDoc = getActiveDocumentOrNull();
+      if (!innerDoc) throw new Error("No document open.");
+
+      const suspension = await executionContext.hostControl.suspendHistory({
+        documentID: innerDoc.id,
+        name: "Filter Script Apply",
+      });
+
+      try {
+        const { targetLayer, createdNewLayer } = await resolveTargetLayer(
+          innerDoc,
+          !!descriptor.createNewLayer,
+          descriptor.newLayerName
+        );
+
+        result = {
+          documentSize: `${innerDoc.width} x ${innerDoc.height} px`,
+          colorMode: getColorModeString(innerDoc.mode),
+          bitDepth: getBitsPerChannelString(innerDoc.bitsPerChannel),
+          layerName: targetLayer.name,
+          layerType: getPixelLayerTypeString(targetLayer),
+          createdNewLayer,
+        };
+
+        await executionContext.hostControl.resumeHistory(suspension);
+      } catch (e) {
+        // Roll back any partial changes made inside this suspended state
+        try {
+          await executionContext.hostControl.resumeHistory(suspension, false);
+        } catch (_) {}
+        throw e;
+      }
+    },
+    {
+      commandName: "Filter Script Apply",
+      descriptor: {
+        createNewLayer: !!createNewLayer,
+        newLayerName,
+      },
+    }
+  );
+
+  return result;
+}
+
+module.exports = {
+  humanizeCamelCase,
+  enumKeyFromValue,
+  documentModeToLabel,
+  layerKindToLabel,
+  bitsPerChannelToLabel,
+  isAmbiguousSolidFillKind,
+  getLayerKindIndex,
+  getLayerTypeLabel,
+  withBusyButton,
+  applyFilter,
+};
