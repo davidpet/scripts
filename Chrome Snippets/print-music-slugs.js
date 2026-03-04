@@ -1,4 +1,6 @@
 // Run this on a productionCrate music category page with all rows shown
+// WARNING: all rows must be actually VISIBLE onscreen (not hidden by scroll)
+//          which means you may need to ZOOM OUT
 
 (() => {
     const links = Array.from(
@@ -12,5 +14,5 @@
 
     let textToPrint = "\n";
     for (const slug of slugs) textToPrint = textToPrint + slug + "\n";
-    console.log("\n", textToPrint, "\n");
+    console.log(String(slugs.length) + " entries", "\n", textToPrint, "\n");
 })();
