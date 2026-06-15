@@ -40,3 +40,6 @@ function clang-run() {
 # JDK paths.
 export JAVA_HOME=$HOME/OpenJDK/jdk-21.0.1.jdk/Contents/Home
 export PATH=$JAVA_HOME/bin:$PATH
+
+# Claude CLI
+export PATH=$HOME/.local/bin:$PATH
