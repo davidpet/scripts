@@ -1,187 +1,4 @@
-const { constants, core, app } = require("photoshop");
-
-function humanizeCamelCase(str) {
-  return String(str)
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/^./, (c) => c.toUpperCase());
-}
-
-function enumKeyFromValue(enumObj, value) {
-  for (const [k, v] of Object.entries(enumObj)) {
-    if (v === value) return k;
-  }
-  return null;
-}
-
-function documentModeToLabel(mode) {
-  // PS can return string-ish values like "RGBCOLORMODE"
-  if (typeof mode === "string") {
-    // Normalize: remove separators, uppercase
-    let s = mode.trim().toUpperCase().replace(/[\s_-]/g, "");
-
-    // Common suffixes
-    s = s.replace(/COLORMODE$/, "").replace(/MODE$/, "");
-
-    const prettyByKey = {
-      BITMAP: "Bitmap",
-      GRAYSCALE: "Grayscale",
-      INDEXED: "Indexed Color",
-      INDEXEDCOLOR: "Indexed Color",
-      MULTICHANNEL: "Multichannel",
-      DUOTONE: "Duotone",
-      LAB: "Lab",
-      RGB: "RGB",
-      CMYK: "CMYK",
-    };
-
-    if (prettyByKey[s]) return prettyByKey[s];
-
-    // If something unexpected shows up, fall back to the normalized string
-    return s;
-  }
-
-  // Enum-backed / numeric cases
-  const { constants } = require("photoshop");
-  const key = enumKeyFromValue(constants.DocumentMode, mode);
-  if (!key) return String(mode);
-
-  const pretty = {
-    BITMAP: "Bitmap",
-    GRAYSCALE: "Grayscale",
-    INDEXEDCOLOR: "Indexed Color",
-    MULTICHANNEL: "Multichannel",
-    DUOTONE: "Duotone",
-    LAB: "Lab",
-    RGB: "RGB",
-    CMYK: "CMYK",
-  };
-
-  return pretty[key] || key;
-}
-
-function layerKindToLabel(kind, amLayerKindIndex) {
-  // If Action Manager tells us it's a vector shape, prefer that label.
-  // Commonly, AM layerKind === 4 is a Shape layer.
-  if (amLayerKindIndex === 4) {
-    return "Shape Layer";
-  }
-
-  // String-ish cases (API can return "solidColor", etc.)
-  if (typeof kind === "string") {
-    const s = kind.trim().replace(/[\s_-]/g, "").toLowerCase();
-    if (s === "solidcolor" || s === "solidfill") {
-      return "Solid Color Fill";
-    }
-    return humanizeCamelCase(kind);
-  }
-
-  // Enum-backed / numeric cases
-  const { constants } = require("photoshop");
-  const key = enumKeyFromValue(constants.LayerKind, kind);
-  if (!key) return String(kind);
-
-  const pretty = {
-    NORMAL: "Normal",
-    TEXT: "Text",
-    GROUP: "Group",
-    SMARTOBJECT: "Smart Object",
-    SOLIDFILL: "Solid Color Fill",
-    GRADIENTFILL: "Gradient Fill",
-    PATTERNFILL: "Pattern Fill",
-  };
-
-  return pretty[key] || key;
-}
-
-function bitsPerChannelToLabel(bitsPerChannel, constantsOverride) {
-  const { constants } = constantsOverride
-    ? { constants: constantsOverride }
-    : require("photoshop");
-
-  // Common cases: might already be a number like 8/16/32
-  if (typeof bitsPerChannel === "number") {
-    return `${bitsPerChannel} bpc`;
-  }
-
-  // Sometimes string-ish (defensive)
-  const s = String(bitsPerChannel);
-
-  // If it looks like "8" / "16" / "32"
-  const asNum = Number(s);
-  if (!Number.isNaN(asNum) && Number.isFinite(asNum)) {
-    return `${asNum} bpc`;
-  }
-
-  // If it looks like "BitsPerChannelType.EIGHT"
-  const dotted = s.split(".").pop();
-
-  const prettyByKey = {
-    ONE: "1 bpc",
-    EIGHT: "8 bpc",
-    SIXTEEN: "16 bpc",
-    THIRTYTWO: "32 bpc",
-  };
-
-  if (prettyByKey[dotted]) {
-    return prettyByKey[dotted];
-  }
-
-  // If it’s an enum value, recover its key from constants.BitsPerChannelType
-  const key = enumKeyFromValue(constants.BitsPerChannelType, bitsPerChannel);
-  if (key && prettyByKey[key]) {
-    return prettyByKey[key];
-  }
-
-  return s;
-}
-
-function isAmbiguousSolidFillKind(kind) {
-  if (typeof kind === "string") {
-    const s = kind.trim().replace(/[\s_-]/g, "").toLowerCase();
-    // handle "solidColor", "Solid Color", etc.
-    return s === "solidcolor" || s === "solidfill" || s === "solidfilllayer";
-  }
-
-  const { constants } = require("photoshop");
-  return kind === constants.LayerKind.SOLIDFILL;
-}
-
-async function getLayerKindIndex(layerId) {
-  try {
-    const { action } = require("photoshop");
-
-    const result = await action.batchPlay(
-      [
-        {
-          _obj: "get",
-          _target: [
-            { _ref: "property", _property: "layerKind" },
-            { _ref: "layer", _id: layerId },
-            { _ref: "document", _enum: "ordinal", _value: "targetEnum" },
-          ],
-          _options: { dialogOptions: "dontDisplay" },
-        },
-      ],
-      { synchronousExecution: false, modalBehavior: "fail" }
-    );
-
-    const first = Array.isArray(result) ? result[0] : null;
-    return first && typeof first.layerKind !== "undefined" ? first.layerKind : null;
-  } catch (e) {
-    return null;
-  }
-}
-
-async function getLayerTypeLabel(layer) {
-  if (!layer) return "(none selected)";
-
-  let amLayerKindIndex = null;
-  if (isAmbiguousSolidFillKind(layer.kind)) {
-    amLayerKindIndex = await getLayerKindIndex(layer.id);
-  }
-
-  return layerKindToLabel(layer.kind, amLayerKindIndex);
-}
+const { app, core, imaging, constants } = require("photoshop");
 
 function withBusyButton(buttonEl, asyncHandler, options) {
   const loadingLabel =
@@ -204,171 +21,302 @@ function withBusyButton(buttonEl, asyncHandler, options) {
   };
 }
 
-function getActiveDocumentOrNull() {
-  try {
-    return app.activeDocument;
-  } catch (e) {
-    return null;
+function getDocOrThrow() {
+  const doc = app.activeDocument;
+  if (!doc) throw new Error("No document open.");
+  return doc;
+}
+
+function getBpcNumber(doc) {
+  // doc.bitsPerChannel is Constants.BitsPerChannelType
+  switch (doc.bitsPerChannel) {
+    case constants.BitsPerChannelType.ONE:
+      return 1;
+    case constants.BitsPerChannelType.EIGHT:
+      return 8;
+    case constants.BitsPerChannelType.SIXTEEN:
+      return 16;
+    case constants.BitsPerChannelType.THIRTYTWO:
+      return 32;
+    default:
+      return 0;
   }
 }
 
-function getEnumKey(enumObj, value) {
-  if (!enumObj) return null;
-  for (const k of Object.keys(enumObj)) {
-    if (enumObj[k] === value) return k;
+function getColorSpaceOrThrow(doc) {
+  switch (doc.mode) {
+    case constants.DocumentMode.RGB:
+      return "RGB";
+    case constants.DocumentMode.GRAYSCALE:
+      return "Grayscale";
+    case constants.DocumentMode.LAB:
+      return "LAB";
+    default:
+      throw new Error(
+        "Unsupported document mode. Supported: RGB, Grayscale, Lab."
+      );
   }
-  return null;
-}
-
-function getColorModeString(mode) {
-  // Handles cases like "RGBCOLORMODE"
-  if (typeof mode === "string") {
-    return mode.toUpperCase().replace(/COLORMODE$/, "").replace(/COLOR$/, "");
-  }
-  const key =
-    getEnumKey(constants.DocumentMode, mode) ||
-    getEnumKey(constants.ChangeMode, mode);
-  return key ? key : String(mode);
-}
-
-function getBitsPerChannelString(bitsPerChannel) {
-  if (typeof bitsPerChannel === "number") return `${bitsPerChannel} bpc`;
-  if (typeof bitsPerChannel === "string") {
-    const s = bitsPerChannel.toUpperCase();
-    
-    // Handle tokens like "BITDEPTH16"
-    const m = s.match(/BITDEPTH(\d+)/);
-    if (m && m[1]) return `${m[1]} bpc`;
-
-
-    if (s.includes("EIGHT") || s === "8") return "8 bpc";
-    if (s.includes("SIXTEEN") || s === "16") return "16 bpc";
-    if (s.includes("THIRTYTWO") || s === "32") return "32 bpc";
-    return s;
-  }
-
-  const key = getEnumKey(constants.BitsPerChannelType, bitsPerChannel);
-  if (key === "EIGHT") return "8 bpc";
-  if (key === "SIXTEEN") return "16 bpc";
-  if (key === "THIRTYTWO") return "32 bpc";
-  return key ? key : String(bitsPerChannel);
 }
 
 function isPixelLayer(layer) {
-  if (!layer) return false;
-  if (layer.isBackgroundLayer) return true;
-  return layer.kind === constants.LayerKind.NORMAL;
+  // Simplified rule per your decision: only allow NORMAL pixel layers.
+  // (Background layers may behave differently; keeping it strict avoids surprises.)
+  return layer && layer.kind === constants.LayerKind.NORMAL;
 }
 
-function getPixelLayerTypeString(layer) {
-  if (layer && layer.isBackgroundLayer) return "Background Layer";
-  return "Pixel Layer";
-}
+function compileChunkProcessor({ colorSpace, hasAlpha, script }) {
+  // Build a function that processes y in [yStart, yEnd), mutating buf in place.
+  // Channel variables are normalized floats in [0..1].
+  const channels = (() => {
+    if (colorSpace === "RGB") return { names: ["r", "g", "b"], count: 3 };
+    if (colorSpace === "Grayscale") return { names: ["g"], count: 1 };
+    if (colorSpace === "LAB") return { names: ["l", "a", "b"], count: 3 };
+    throw new Error("Unsupported colorSpace for compiler.");
+  })();
 
-async function resolveTargetLayer(doc, createNewLayer, newLayerName) {
-  const activeLayers = Array.from(doc.activeLayers || []);
+  const alphaRead = hasAlpha
+    ? "alpha = buf[idx + ALPHA_OFFSET] / denom;"
+    : "alpha = 1;";
+  const alphaWrite = hasAlpha
+    ? "buf[idx + ALPHA_OFFSET] = Math.round(alpha * denom);"
+    : "";
 
-  // Multiple selection is not supported in this simplified design
-  if (activeLayers.length > 1) {
-    throw new Error("Multiple layers selected. Please select exactly one layer.");
-  }
+  const readChannels = channels.names
+    .map((n, i) => `let ${n} = buf[idx + ${i}] / denom;`)
+    .join("\n");
 
-  const selectedLayer = activeLayers.length === 1 ? activeLayers[0] : null;
+  const writeChannels = channels.names
+    .map(
+      (n, i) => `
+      if (${n} < 0) ${n} = 0; else if (${n} > 1) ${n} = 1;
+      buf[idx + ${i}] = Math.round(${n} * denom);
+    `
+    )
+    .join("\n");
 
-  if (createNewLayer) {
-    if (!selectedLayer) {
-      // Create empty layer if nothing selected
-      const newLayer = await doc.createLayer({ name: newLayerName });
-      doc.activeLayers = [newLayer];
-      return { targetLayer: newLayer, createdNewLayer: true };
+  const clampAlpha = `
+    if (alpha < 0) alpha = 0; else if (alpha > 1) alpha = 1;
+  `;
+
+  // If we have alpha, its offset is channels.count
+  const alphaOffsetLine = hasAlpha
+    ? `const ALPHA_OFFSET = ${channels.count};`
+    : "";
+
+  const componentCount = channels.count + (hasAlpha ? 1 : 0);
+
+  const body = `
+    "use strict";
+    const denom = steps - 1;
+    ${alphaOffsetLine}
+
+    for (let y = yStart; y < yEnd; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = (y * w + x) * ${componentCount};
+
+        ${readChannels}
+        let alpha;
+        ${alphaRead}
+
+        // user script (per-pixel):
+        ${script || ""}
+
+        ${writeChannels}
+        ${clampAlpha}
+        ${alphaWrite}
+      }
     }
+  `;
 
-    // Selected layer must be pixel
-    if (!isPixelLayer(selectedLayer)) {
-      throw new Error("Selected layer is not a pixel layer.");
-    }
-
-    // Copy pixels by duplicating (does not modify original)
-    const dup = await selectedLayer.duplicate();
-    dup.name = newLayerName;
-    doc.activeLayers = [dup];
-    return { targetLayer: dup, createdNewLayer: true };
-  }
-
-  // createNewLayer == false (in-place target)
-  if (!selectedLayer) {
-    throw new Error('No layer selected. Enable "Create New Layer" or select a pixel layer.');
-  }
-  if (!isPixelLayer(selectedLayer)) {
-    throw new Error("Selected layer is not a pixel layer.");
-  }
-
-  return { targetLayer: selectedLayer, createdNewLayer: false };
+  // Parameters: buf, w, h, yStart, yEnd, bpc, steps
+  return new Function("buf", "w", "h", "yStart", "yEnd", "bpc", "steps", body);
 }
 
-async function applyFilter({ createNewLayer, newLayerName = "Filter Script Layer" } = {}) {
-  // Quick pre-check for nicer error message
-  const doc = getActiveDocumentOrNull();
-  if (!doc) throw new Error("No document open.");
+async function applyFilter({ createNewLayer, script }) {
+  const doc = getDocOrThrow();
 
-  let result;
+  const bpc = getBpcNumber(doc);
+  if (bpc !== 8 && bpc !== 16) {
+    throw new Error("Unsupported bit depth. Supported: 8bpc and 16bpc.");
+  }
+  const steps = bpc === 8 ? 256 : 65536;
+
+  const colorSpace = getColorSpaceOrThrow(doc);
+
+  // Compile once (syntax errors should show immediately)
+  // Note: hasAlpha is determined after getPixels; we recompile if needed inside modal.
 
   await core.executeAsModal(
-    async (executionContext, descriptor) => {
-      const innerDoc = getActiveDocumentOrNull();
-      if (!innerDoc) throw new Error("No document open.");
-
-      const suspension = await executionContext.hostControl.suspendHistory({
-        documentID: innerDoc.id,
-        name: "Filter Script Apply",
+    async (executionContext) => {
+      const hostControl = executionContext.hostControl;
+      const suspensionID = await hostControl.suspendHistory({
+        documentID: doc.id,
+        name: "Filter Script",
       });
 
       try {
-        const { targetLayer, createdNewLayer } = await resolveTargetLayer(
-          innerDoc,
-          !!descriptor.createNewLayer,
-          descriptor.newLayerName
-        );
+        // ---- establish target layer (selected or new/duplicate) ----
+        const selected = doc.activeLayers || [];
+        let targetLayer = null;
 
-        result = {
-          documentSize: `${innerDoc.width} x ${innerDoc.height} px`,
-          colorMode: getColorModeString(innerDoc.mode),
-          bitDepth: getBitsPerChannelString(innerDoc.bitsPerChannel),
-          layerName: targetLayer.name,
-          layerType: getPixelLayerTypeString(targetLayer),
-          createdNewLayer,
-        };
+        if (createNewLayer) {
+          executionContext.reportProgress({
+            value: 0,
+            commandName: "Preparing layer...",
+          });
 
-        await executionContext.hostControl.resumeHistory(suspension);
-      } catch (e) {
-        // Roll back any partial changes made inside this suspended state
-        try {
-          await executionContext.hostControl.resumeHistory(suspension, false);
-        } catch (_) {}
-        throw e;
+          if (selected.length === 1) {
+            const sourceLayer = selected[0];
+            if (!isPixelLayer(sourceLayer)) {
+              throw new Error(
+                "Selected layer must be a pixel layer (normal) to duplicate."
+              );
+            }
+            targetLayer = await sourceLayer.duplicate();
+            targetLayer.name = "Filter Script Layer";
+            doc.activeLayers = [targetLayer];
+          } else if (selected.length === 0) {
+            targetLayer = await doc.createPixelLayer({
+              name: "Filter Script Layer",
+            });
+            doc.activeLayers = [targetLayer];
+          } else {
+            throw new Error(
+              "Multiple layers selected. Please select a single pixel layer."
+            );
+          }
+        } else {
+          if (selected.length === 0) {
+            throw new Error(
+              "No layer selected. Enable “Create New Layer” or select a single pixel layer."
+            );
+          }
+          if (selected.length > 1) {
+            throw new Error(
+              "Multiple layers selected. Please select a single pixel layer."
+            );
+          }
+          targetLayer = selected[0];
+          if (!isPixelLayer(targetLayer)) {
+            throw new Error("Selected layer must be a pixel layer (normal).");
+          }
+        }
+
+        // ---- pixel I/O ----
+        const w = Number(doc.width);
+        const h = Number(doc.height);
+
+        executionContext.reportProgress({
+          value: 0,
+          commandName: "Reading pixels...",
+        });
+
+        const imageObj = await imaging.getPixels({
+          documentID: doc.id,
+          layerID: targetLayer.id,
+          sourceBounds: { left: 0, top: 0, right: w, bottom: h },
+        });
+
+        const imageData = imageObj.imageData;
+        const trimmed = imageObj.sourceBounds; // may be smaller than requested
+        const hasAlpha = !!imageData.hasAlpha;
+
+        // Ensure we process in "full range" for 16bpc so steps=65536 matches the buffer.
+        const srcBuf = await imageData.getData({ fullRange: bpc === 16 });
+
+        // Create a full-document buffer (missing areas treated as 0 / transparent)
+        const components = imageData.components; // includes alpha if present
+        const fullLen = w * h * components;
+
+        const fullBuf =
+          bpc === 16 ? new Uint16Array(fullLen) : new Uint8Array(fullLen);
+
+        // Copy trimmed region into the full buffer at the correct offset
+        const srcW = Math.max(0, (trimmed.right - trimmed.left) | 0);
+        const srcH = Math.max(0, (trimmed.bottom - trimmed.top) | 0);
+
+        if (srcW > 0 && srcH > 0) {
+          for (let row = 0; row < srcH; row++) {
+            const srcRowStart = row * srcW * components;
+            const dstRowStart =
+              ((trimmed.top + row) * w + trimmed.left) * components;
+            fullBuf.set(
+              srcBuf.subarray(srcRowStart, srcRowStart + srcW * components),
+              dstRowStart
+            );
+          }
+        }
+
+        // Compile a chunk processor now that we know hasAlpha.
+        const processChunk = compileChunkProcessor({
+          colorSpace,
+          hasAlpha,
+          script,
+        });
+
+        // ---- process pixels with progress ----
+        const totalPixels = w * h;
+        const CHUNK_ROWS = 32;
+
+        executionContext.reportProgress({
+          value: 0,
+          commandName: `Processing 0 / ${totalPixels}`,
+        });
+
+        for (let yStart = 0; yStart < h; yStart += CHUNK_ROWS) {
+          if (executionContext.isCancelled) throw new Error("Cancelled.");
+
+          const yEnd = Math.min(h, yStart + CHUNK_ROWS);
+
+          processChunk(fullBuf, w, h, yStart, yEnd, bpc, steps);
+
+          const donePixels = yEnd * w;
+          const value = donePixels / totalPixels;
+
+          executionContext.reportProgress({
+            value,
+            commandName: `Processing ${donePixels} / ${totalPixels}`,
+          });
+
+          // yield so cancellation/progress UI has a chance to breathe
+          await new Promise((r) => setTimeout(r, 0));
+        }
+
+        // ---- write back ----
+        executionContext.reportProgress({
+          value: 1,
+          commandName: "Writing pixels...",
+        });
+
+        const outImageData = await imaging.createImageDataFromBuffer(fullBuf, {
+          width: w,
+          height: h,
+          components,
+          chunky: true,
+          colorSpace,
+          pixelFormat: imageData.pixelFormat,
+          fullRange: bpc === 16,
+        });
+
+        await imaging.putPixels({
+          documentID: doc.id,
+          layerID: targetLayer.id,
+          imageData: outImageData,
+          targetBounds: { left: 0, top: 0 },
+          replace: true,
+        });
+
+        imageData.dispose();
+        outImageData.dispose();
+      } finally {
+        await hostControl.resumeHistory(suspensionID);
       }
     },
-    {
-      commandName: "Filter Script Apply",
-      descriptor: {
-        createNewLayer: !!createNewLayer,
-        newLayerName,
-      },
-    }
+    { commandName: "Filter Script" }
   );
-
-  return result;
 }
 
 module.exports = {
-  humanizeCamelCase,
-  enumKeyFromValue,
-  documentModeToLabel,
-  layerKindToLabel,
-  bitsPerChannelToLabel,
-  isAmbiguousSolidFillKind,
-  getLayerKindIndex,
-  getLayerTypeLabel,
   withBusyButton,
   applyFilter,
 };

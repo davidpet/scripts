@@ -4,14 +4,132 @@
     <script src="main.js"></script> 
     <link rel="stylesheet" href="style.css">   
 </head>
-<body>
-  <sp-heading>Filter Script</sp-heading>
-  <sp-checkbox id="createLayer" checked>Create New Layer</sp-checkbox>
-  <sp-body id="data">
-    (click Apply)
-  </sp-body>
-  <footer>
-    <sp-button id="action">Apply</sp-button>
-  </footer>
-</body>
+  <body>
+    <!-- Top bar -->
+    <div class="topbar">
+      <sp-heading>Filter Script</sp-heading>
+    </div>
+
+    <!-- Status line -->
+    <sp-help-text id="status" variant="negative" class="hidden"></sp-help-text>
+    <div class="optionsRow">
+      <sp-checkbox id="createNewLayer" checked>Create New Layer</sp-checkbox>
+    </div>
+
+    <!-- Main split view -->
+    <div class="main">
+      <div class="editorPane">
+        <div class="editorShell">
+          <!-- Top row: editor + vertical scrollbar -->
+          <div class="editorTopRow">
+            <textarea
+              id="script"
+              class="codeEditor"
+              spellcheck="false"
+              wrap="off"
+              maxlength="1000000"
+            ></textarea>
+
+            <div class="vScroll">
+              <sp-action-button id="vTop" class="scrollBtn" title="Top">⏶</sp-action-button>
+              <sp-action-button id="vUp" class="scrollBtn" title="Up">▲</sp-action-button>
+
+              <div id="vTrack" class="scrollTrack v">
+                <div id="vThumb" class="scrollThumb v"></div>
+              </div>
+
+              <sp-action-button id="vDown" class="scrollBtn" title="Down">▼</sp-action-button>
+              <sp-action-button id="vBottom" class="scrollBtn" title="Bottom">⏷</sp-action-button>
+            </div>
+          </div>
+
+          <!-- Bottom row: horizontal scrollbar + corner -->
+          <div class="editorBottomRow">
+            <div class="hScroll">
+              <sp-action-button id="hLeftMost" class="scrollBtn" title="Far left">⏴</sp-action-button>
+              <sp-action-button id="hLeft" class="scrollBtn" title="Left">◀</sp-action-button>
+
+              <div id="hTrack" class="scrollTrack h">
+                <div id="hThumb" class="scrollThumb h"></div>
+              </div>
+
+              <sp-action-button id="hRight" class="scrollBtn" title="Right">▶</sp-action-button>
+              <sp-action-button id="hRightMost" class="scrollBtn" title="Far right">⏵</sp-action-button>
+            </div>
+
+            <div class="scrollCorner"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="refPane">
+        <div class="refHeader">
+          <sp-heading size="S">Reference</sp-heading>
+        </div>
+
+        <div class="refContent">
+          <!-- "Accordion-like" sections (built with supported components) -->
+          <sp-action-button class="refToggle" data-target="refPos" aria-expanded="false">
+            Position (read-only)
+          </sp-action-button>
+          <div id="refPos" class="refSection hidden">
+            <sp-body>
+              <div><code>x</code>, <code>y</code> — pixel coordinates (0-based)</div>
+              <div><code>w</code>, <code>h</code> — document width/height in pixels</div>
+            </sp-body>
+          </div>
+
+          <sp-action-button class="refToggle" data-target="refQuant" aria-expanded="false">
+            Bit depth / quantization (read-only)
+          </sp-action-button>
+          <div id="refQuant" class="refSection hidden">
+            <sp-body>
+              <div><code>bpc</code> — 8 or 16 (32-bit currently errors)</div>
+              <div><code>steps</code> — 256 (8bpc) or 65536 (16bpc)</div>
+              <div class="refExample">
+                Ramp example:<br>
+                <code>const code = Math.floor((x / w) * steps);</code>
+                <br />
+                <code>r = g = b = code / (steps - 1);</code>
+              </div>
+            </sp-body>
+          </div>
+
+          <sp-action-button class="refToggle" data-target="refRGB" aria-expanded="false">
+            RGB (read/write)
+          </sp-action-button>
+          <div id="refRGB" class="refSection hidden">
+            <sp-body>
+              <div><code>r</code>, <code>g</code>, <code>b</code>, <code>alpha</code> — floats (normally 0..1)</div>
+            </sp-body>
+          </div>
+
+          <sp-action-button class="refToggle" data-target="refGray" aria-expanded="false">
+            Grayscale (read/write)
+          </sp-action-button>
+          <div id="refGray" class="refSection hidden">
+            <sp-body>
+              <div><code>g</code>, <code>alpha</code> — floats (normally 0..1)</div>
+            </sp-body>
+          </div>
+
+          <sp-action-button class="refToggle" data-target="refLab" aria-expanded="false">
+            Lab (read/write)
+          </sp-action-button>
+          <div id="refLab" class="refSection hidden">
+            <sp-body>
+              <div><code>l</code>, <code>a</code>, <code>b</code>, <code>alpha</code> — floats (normally 0..1)</div>
+              <div><small>Note: Lab channels are encoded; neutral a/b are around 0.5.</small></div>
+            </sp-body>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <footer class="bottombar">
+      <sp-button id="action" variant="primary">Apply</sp-button>
+    </footer>
+  </body>
+
 </html>
